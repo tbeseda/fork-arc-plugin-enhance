@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "arc sandbox"
+  },
+  "devDependencies": {
+    "@architect/architect": "^11.0.4"
+  },
+  "dependencies": {
+    "@enhance/enhance-style-transform": "^0.1.2",
+    "@enhance/import-transform": "^4.0.0",
+    "prettify-xml": "^1.2.0"
+  }
+}

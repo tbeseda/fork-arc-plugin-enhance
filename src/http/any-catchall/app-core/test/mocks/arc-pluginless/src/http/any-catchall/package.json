@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@architect/functions": "^8.0.3",
+    "enhance-app-core": "file:../../../../../.."
+  }
+}

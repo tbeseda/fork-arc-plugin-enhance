@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run test.test",
+    "test.coverage": "node --test --experimental-test-coverage **/*-test.js",
+    "test.test": "node --test **/*-test.js"
+  },
+  "dependencies": {
+    "@enhance/ssr": "^3.5.1",
+    "fast-glob": "^3.3.2",
+    "radix3": "^1.1.0"
+  },
+  "devDependencies": {
+    "@architect/functions": "^8.0.3",
+    "@enhance/types": "^0.7.0"
+  }
+}

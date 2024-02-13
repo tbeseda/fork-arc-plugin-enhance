@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "nodemon node server.js"
+  },
+  "dependencies": {
+    "@enhance/enhance-style-transform": "^0.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
