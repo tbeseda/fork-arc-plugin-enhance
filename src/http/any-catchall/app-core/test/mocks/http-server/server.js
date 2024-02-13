@@ -10,7 +10,7 @@ const { routeAndRender, report } = createRouter({
   elementsPath: 'foo-app/elements',
   componentsPath: 'foo-app/components',
   ssrOptions: {
-    styleTransforms: [styleTransform],
+    styleTransforms: [ styleTransform ],
   },
   state: { title: 'foobarbaz' },
   head (payload) {

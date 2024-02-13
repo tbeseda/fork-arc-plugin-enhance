@@ -8,7 +8,7 @@ const { sync: globSync } = fg
 const globOpts = {
   onlyFiles: true,
   dot: true,
-  ignore: ['**/node_modules/**'],
+  ignore: [ '**/node_modules/**' ],
 }
 
 /** @returns {import('./types.js').RoutesManifest} */
@@ -35,7 +35,8 @@ export function routesFromPaths ({ apiPath, pagesPath }) {
       // api or page with different extension
       const existingRoute = routes.get(route)
       existingRoute.page = { ...existingRoute.page, [extension]: file }
-    } else {
+    }
+    else {
       routes.set(route, { page: { [extension]: file } })
     }
   }
@@ -62,7 +63,8 @@ export function elementsFromPaths ({ elementsPath, componentsPath }) {
       if (!currentFile || file.length < currentFile.length) {
         elements.get(name)[extension] = file
       }
-    } else {
+    }
+    else {
       elements.set(name, { [extension]: file })
     }
   }
@@ -73,7 +75,8 @@ export function elementsFromPaths ({ elementsPath, componentsPath }) {
     const name = createElementName(file)
     if (elements.has(name)) {
       elements.get(name).component = file
-    } else {
+    }
+    else {
       elements.set(name, { component: file })
     }
   }

@@ -38,7 +38,8 @@ export function htmlSkeleton (htmlString) {
       if (!tag.includes('/')) {
         tagStack.push(tag)
         result += '\n' + '  '.repeat(tagStack.length - 1) + tag
-      } else {
+      }
+      else {
         tagStack.pop()
       }
     }

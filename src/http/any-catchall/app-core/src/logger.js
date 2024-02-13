@@ -24,7 +24,7 @@ export function createReport ({ elements, routes, radixRouter }) {
   function createTree (list = []) {
     return list
       .map((s, i) =>
-         `    ${c.blue(i === list.length - 1 ? '└──' : '├──')} ${s}`,
+        `    ${c.blue(i === list.length - 1 ? '└──' : '├──')} ${s}`,
       )
       .join('\n')
   }
@@ -33,9 +33,9 @@ export function createReport ({ elements, routes, radixRouter }) {
     out(`
 ${c.blue('⏺───')} ${c.b(c.orange('EnhanceAppCore Report'))}
   ${c.blue('○─┬─')} #elements ${c.dim(`(${elements.size})`)}
-${createTree([...elements.keys()].map(e => `<${e}>`))}
+${createTree([ ...elements.keys() ].map(e => `<${e}>`))}
   ${c.blue('●─┬─')} #router ${c.dim(`(${routes.size})`)}
-${createTree([...routes.keys()].map(r => `/${r}`))}
+${createTree([ ...routes.keys() ].map(r => `/${r}`))}
     `)
   }
 }

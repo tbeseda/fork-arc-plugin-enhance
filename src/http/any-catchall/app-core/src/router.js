@@ -14,17 +14,21 @@ export function createRouter (options) {
     lazy = false, // ! not implemented
     debug = false,
   } = options
-  // paths to expand with basePath:
   let {
+    // paths to expand with basePath:
     apiPath,
     pagesPath,
     elementsPath,
     componentsPath,
+    // provided functions:
+    routes,
+    elements,
   } = options
 
   if (lazy) {
     throw new Error('lazy router not yet implemented')
-  } else {
+  }
+  else {
     const timers = headerTimers({ enabled: true })
     const log = createLogger(debug)
 
@@ -32,10 +36,12 @@ export function createRouter (options) {
 
     timers.start('enhance-fs-scan')
 
-    log('creating routs from:'); log(4, apiPath, '+', pagesPath)
-    apiPath = join(basePath, apiPath)
-    pagesPath = join(basePath, pagesPath)
-    const routes = routesFromPaths({ apiPath, pagesPath })
+    if (!routes && apiPath && pagesPath) {
+      log('creating routs from:'); log(4, apiPath, '+', pagesPath)
+      apiPath = join(basePath, apiPath)
+      pagesPath = join(basePath, pagesPath)
+      const routes = routesFromPaths({ apiPath, pagesPath })
+    }
 
     log('scanning for elements in:'); log(4, elementsPath, '+', componentsPath)
     elementsPath = join(basePath, elementsPath)
@@ -46,7 +52,7 @@ export function createRouter (options) {
 
     // create radix router
     const radixRouter = radix3.createRouter()
-    for (const [path, data] of routes) radixRouter.insert(`/${path}`, data)
+    for (const [ path, data ] of routes) radixRouter.insert(`/${path}`, data)
 
     const { render, routeAndRender } = createRouteAndRender({
       timers,

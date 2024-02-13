@@ -19,8 +19,8 @@ const router = createRouter({
   elementsPath: 'elements',
   componentsPath: 'components',
   ssrOptions: {
-    scriptTransforms: [importTransform({ lookup: arc.static })],
-    styleTransforms: [styleTransform],
+    scriptTransforms: [ importTransform({ lookup: arc.static }) ],
+    styleTransforms: [ styleTransform ],
   },
   state: getState(),
   head,
@@ -45,7 +45,8 @@ ${c.pink('───────────────────────�
     }
 
     return postflight(response)
-  } catch (err) {
+  }
+  catch (err) {
     return {
       statusCode: Number(err.message),
       html: await router.render(`
