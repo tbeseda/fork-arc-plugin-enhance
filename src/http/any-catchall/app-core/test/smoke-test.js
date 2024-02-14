@@ -21,13 +21,16 @@ test('smoke test', async () => {
     debug: true,
   })
 
+  report()
+
   assert.equal(routes.size, 4)
   assert.equal(elements.size, 6)
-  const response = await routeAndRender({ path: '/foo-bar' })
+  const response = await routeAndRender({
+    method: 'GET',
+    path: '/foo-bar',
+  })
   assert.ok(response.html)
   assert.equal(typeof response.html, 'string')
-
-  report()
 
   console.log(`
 ${c.pink('───')} ${c.orange('HTML')} 💀 ${c.pink('───────────────────')}
