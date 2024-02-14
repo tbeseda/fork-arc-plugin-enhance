@@ -4,13 +4,14 @@
  */
 export async function get (req, store) {
   const { path, params } = req
-  const json = { from: 'theApi', ...store }
+  const { state } = store
+  const json = { from: 'theApi', ...state }
 
   const _ = ' '.repeat(6)
   console.log(_, '└┬─ foo-bar.mjs get()')
   console.log(_, ' ├─ req.path:', path)
   console.log(_, ' ├─ req.params:', params)
-  console.log(_, ' ├─ got store.title:', store.title)
+  console.log(_, ' ├─ got state.title:', state.title)
   console.log(_, ' └─ returning json:', json)
 
   return {

@@ -11,72 +11,72 @@ import { createLogger, createReport } from './logger.js'
 export function createRouter (options) {
   const {
     basePath,
-    lazy = false, // ! not implemented
     debug = false,
   } = options
   let {
     // paths to expand with basePath:
-    apiPath,
-    pagesPath,
-    elementsPath,
-    componentsPath,
-    // provided functions:
+    apiPath = 'api',
+    pagesPath = 'pages',
+    elementsPath = 'elements',
+    componentsPath = 'components',
+    // provided manifests:
     routes,
     elements,
   } = options
 
-  if (lazy) {
-    throw new Error('lazy router not yet implemented')
+  const timers = headerTimers({ enabled: true })
+  const log = createLogger(debug)
+
+  log(0, '✦ Router started in:', basePath)
+
+  timers.start('enhance-fs-scan')
+
+  if (!routes && (apiPath || pagesPath)) {
+    log('creating routes from:'); log(4, apiPath, '+', pagesPath)
+    apiPath = join(basePath, apiPath)
+    pagesPath = join(basePath, pagesPath)
+    routes = routesFromPaths({ apiPath, pagesPath })
   }
-  else {
-    const timers = headerTimers({ enabled: true })
-    const log = createLogger(debug)
+  else routes = new Map()
 
-    log(0, '✦ Router started in:', basePath)
-
-    timers.start('enhance-fs-scan')
-
-    if (!routes && apiPath && pagesPath) {
-      log('creating routs from:'); log(4, apiPath, '+', pagesPath)
-      apiPath = join(basePath, apiPath)
-      pagesPath = join(basePath, pagesPath)
-      const routes = routesFromPaths({ apiPath, pagesPath })
-    }
-
+  if (!elements && (elementsPath || componentsPath)) {
     log('scanning for elements in:'); log(4, elementsPath, '+', componentsPath)
     elementsPath = join(basePath, elementsPath)
     componentsPath = join(basePath, componentsPath)
-    const elements = elementsFromPaths({ elementsPath, componentsPath })
+    elements = elementsFromPaths({ elementsPath, componentsPath })
+  }
+  else elements = new Map()
 
-    timers.stop('enhance-fs-scan')
+  timers.stop('enhance-fs-scan')
 
-    // create radix router
-    const radixRouter = radix3.createRouter()
-    for (const [ path, data ] of routes) radixRouter.insert(`/${path}`, data)
+  const radixRouter = radix3.createRouter({
+    routes: Object.fromEntries(routes),
+  })
 
-    const { render, routeAndRender } = createRouteAndRender({
-      timers,
-      log,
-      radixRouter,
-      elements,
-      ...options,
-      apiPath, // override options with expanded paths
-      pagesPath,
-      elementsPath,
-      componentsPath,
-    })
+  const { render, routeAndRender } = createRouteAndRender({
+    timers,
+    log,
+    radixRouter,
+    ...options,
+    // override options with updates
+    elements,
+    apiPath,
+    pagesPath,
+    elementsPath,
+    componentsPath,
+  })
 
-    const report = createReport({ elements, routes, radixRouter })
+  const report = createReport({ elements, routes })
 
-    return {
-      options,
-      routes,
-      elements,
-      radixRouter,
-      log,
-      report,
-      render,
-      routeAndRender,
-    }
+  return {
+    options,
+    routes,
+    elements,
+    radixRouter,
+    timers,
+    log,
+    report,
+    render,
+    routeAndRender,
   }
 }

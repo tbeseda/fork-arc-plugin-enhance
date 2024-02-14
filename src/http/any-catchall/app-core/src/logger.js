@@ -20,7 +20,7 @@ export function createLogger (debug = false) {
     : () => {}
 }
 
-export function createReport ({ elements, routes, radixRouter }) {
+export function createReport ({ elements, routes }) {
   function createTree (list = []) {
     return list
       .map((s, i) =>

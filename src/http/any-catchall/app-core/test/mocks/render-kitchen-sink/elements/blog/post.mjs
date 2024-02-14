@@ -2,7 +2,7 @@
 export default function ({ html, state: { store } }) {
   const { from, title } = store
   console.log('     └┬─ blog/post.mjs')
-  console.log('      └─ state:', store)
+  console.log('      └─ store:', store)
 
   return html`
     <article>
