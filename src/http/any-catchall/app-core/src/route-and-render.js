@@ -1,8 +1,6 @@
 import enhance from '@enhance/ssr'
 import headerTimers from 'header-timers'
 
-import { logRequest } from './util.js'
-
 /** @type {import('./types.js').CreateEnhanceRouteAndRender} */
 export function createRouteAndRender ({
   timers: routerTimers,
@@ -31,7 +29,7 @@ export function createRouteAndRender ({
 
     const timers = headerTimers({ enabled: true })
 
-    logRequest(log, req)
+    log.request(req)
 
     /** @type {(import('./types.js').RouteRecord & { params?: Record<string, any> }) | null} */
     const route = radixRouter.lookup(path)

@@ -47,7 +47,10 @@ export type EnhanceRouterOptions = {
 
 export type CreateRouteAndRenderOptions = (
   EnhanceRouterOptions & {
-    log: Function,
+    log: {
+      (...strings: any[]): void;
+      request: (req: ArcRequest) => void;
+    },
     radixRouter: RadixRouter,
     elements: Record<string, Function>,
     timers: HeaderTimers,

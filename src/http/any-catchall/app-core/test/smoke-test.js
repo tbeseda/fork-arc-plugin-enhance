@@ -4,8 +4,9 @@ import { dirname, join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-import { createRouter, htmlSkeleton, c } from '../src/index.js'
+import { createRouter } from '../src/index.js'
 
+const PRINT = true
 const here = dirname(fileURLToPath(import.meta.url))
 
 const state = { title: 'foobarbaz' }
@@ -50,10 +51,10 @@ test('smoke test VANILLA', async () => {
     elements: nestedElements,
     state,
     head,
-    // debug: true,
+    debug: true, // enabled to complete code coverage
   })
 
-  router.report()
+  router.report(router.log)
 
   assert.ok(router)
   assert.ok(router.timers)
@@ -65,7 +66,10 @@ test('smoke test VANILLA', async () => {
   assert.equal(router.routes.size, vanillaRoutes.size)
   assert.equal(Object.keys(router.elements).length, Object.keys(nestedElements).length)
 
-  const vanillaResponse = await router.routeAndRender({ path: '/vanilla' })
+  const vanillaResponse = await router.routeAndRender({
+    path: '/vanilla',
+    requestContext: { timeEpoch: Date.now() / 1000 },
+  })
   assert.ok(vanillaResponse.html)
   assert.equal(typeof vanillaResponse.html, 'string')
 
@@ -114,7 +118,7 @@ test('smoke test DEFERRED', async () => {
     // debug: true,
   })
 
-  // router.report()
+  router.report(router.log)
 
   const deferredResponse = await router.routeAndRender({ path: '/deferred' })
   assert.ok(deferredResponse.html)
@@ -130,6 +134,7 @@ test('smoke test DEFERRED', async () => {
 })
 
 function printHtml (title, htmlString) {
+  if (!PRINT) return
   const skeleton = htmlSkeleton(htmlString)
   const longestLine = skeleton.split('\n').reduce((a, b) => a.length > b.length ? a : b)
   const titleLine = `${c.pink(('┌─'))} ${c.orange(title)} 🩻 ${c.pink('─○')}`
@@ -140,4 +145,47 @@ ${titleLine}
 ${skeleton.split('\n').map(line => `${c.pink('│')} ${line}`).join('\n')}
 ${lastLine}
   `)
+}
+
+export function htmlSkeleton (htmlString) {
+  htmlString = htmlString.replace(/\s{2,}/g, ' ')
+
+  const tagStack = []
+  let result = ''
+
+  for (let i = 0; i < htmlString.length; i++) {
+    const char = htmlString[i]
+
+    if (char === '<') {
+      // TODO: handle comments
+      let tag = ''
+
+      while (htmlString[i] !== '>') {
+        tag += htmlString[i]
+        i++
+      }
+
+      tag += '>'
+
+      if (!tag.includes('/')) {
+        tagStack.push(tag)
+        result += '\n' + '  '.repeat(tagStack.length - 1) + tag
+      }
+      else {
+        tagStack.pop()
+      }
+    }
+  }
+
+  return result.trim()
+}
+
+export const c = {
+  b (str) { return `\x1b[1m${str}\x1b[22m` },
+  i (str) { return `\x1b[3m${str}\x1b[23m` },
+  orange (str) { return this.b(`\x1b[33m${str}\x1b[0m`) },
+  magenta (str) { return this.b(`\x1b[35m${str}\x1b[0m`) },
+  pink (str) { return this.b(`\x1b[95m${str}\x1b[0m`) },
+  blue (str) { return this.b(`\x1b[34m${str}\x1b[0m`) },
+  dim (str) { return `\x1b[90m${str}\x1b[0m` },
 }
