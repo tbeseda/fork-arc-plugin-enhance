@@ -1,5 +1,8 @@
 /// <reference types="node" />
 
+// TODO: better naming for types
+// ? namespace?
+
 import type { HttpAsyncHandler, } from '@architect/functions';
 import type { EnhanceHeadFn } from '@enhance/types';
 import type { RadixRouter } from 'radix3';
@@ -13,10 +16,10 @@ export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head
 
 export type RouteRecord = {
   api?: {
-    fn?: Record<HTTPishMethod, Function> | Promise<Record<HTTPishMethod, Function>>;
-    file?: {
-      mjs?: string;
+    fn?: {
+      [key in HTTPishMethod]?: Function;
     };
+    deferredFn?: Promise<Record<HTTPishMethod, Function>>;
   };
   page?: {
     html?: string;
@@ -26,32 +29,15 @@ export type RouteRecord = {
       deferredFn?: Promise<Function>;
       fn?: Function;
     };
-    file?: {
-      html?: string;
-      mjs?: string;
-    };
   };
 }
 export type RoutesManifest = Map<string, RouteRecord>;
 
-export type ElementRecord = {
-  fn?: Function;
-  file?: {
-    html?: string;
-    mjs?: string;
-    component?: string;
-  };
-}
-export type ElementsManifest = Map<string, ElementRecord>;
-
 export type EnhanceRouterOptions = {
-  basePath: string;
-  apiPath?: string;
-  pagesPath?: string;
-  elementsPath?: string;
-  componentsPath?: string;
-  routes?: RoutesManifest;
-  elements?: ElementsManifest;
+  routes: RoutesManifest;
+  elements?: {
+    [key: string]: Function;
+  };
   head?: EnhanceHeadFn;
   state?: Record<string, any>;
   ssrOptions?: Record<string, any>;
@@ -62,11 +48,7 @@ export type CreateRouteAndRenderOptions = (
   EnhanceRouterOptions & {
     log: Function,
     radixRouter: RadixRouter,
-    elements: ElementsManifest,
-    apiPath: string,
-    pagesPath: string,
-    elementsPath: string,
-    componentsPath: string,
+    elements: Record<string, Function>,
     timers: HeaderTimers,
   }
 )
@@ -92,7 +74,7 @@ export type CreateEnhanceRouteAndRender = (options: CreateRouteAndRenderOptions)
 export type CreateEnhanceRouter = (options: EnhanceRouterOptions) => {
   options: EnhanceRouterOptions;
   routes: RoutesManifest;
-  elements: ElementsManifest;
+  elements: Record<string, Function>;
   radixRouter: RadixRouter;
   timers: HeaderTimers;
   log: Function;

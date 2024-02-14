@@ -1,51 +1,17 @@
-import { join } from 'node:path'
-
 import * as radix3 from 'radix3'
 import headerTimers from 'header-timers'
 
-import { routesFromPaths, elementsFromPaths } from './scan-paths.js'
 import { createRouteAndRender } from './route-and-render.js'
 import { createLogger, createReport } from './logger.js'
 
 /** @type {import('./types').CreateEnhanceRouter} */
-export function createRouter (options) {
-  const {
-    basePath,
-    debug = false,
-  } = options
-  let {
-    // paths to expand with basePath:
-    apiPath = 'api',
-    pagesPath = 'pages',
-    elementsPath = 'elements',
-    componentsPath = 'components',
-    // provided manifests:
-    routes = new Map(),
-    elements = new Map(),
-  } = options
+export function createRouter ({ debug = false, ...options }) {
+  const { routes, elements = {} } = options
 
   const timers = headerTimers({ enabled: true })
   const log = createLogger(debug)
 
-  log(0, '✦ Router started in:', basePath)
-
-  timers.start('enhance-fs-scan')
-
-  if (routes.size === 0 && (apiPath || pagesPath)) {
-    log('creating routes from:'); log(4, apiPath, '+', pagesPath)
-    apiPath = join(basePath, apiPath)
-    pagesPath = join(basePath, pagesPath)
-    routes = routesFromPaths({ apiPath, pagesPath })
-  }
-
-  if (elements.size === 0 && (elementsPath || componentsPath)) {
-    log('scanning for elements in:'); log(4, elementsPath, '+', componentsPath)
-    elementsPath = join(basePath, elementsPath)
-    componentsPath = join(basePath, componentsPath)
-    elements = elementsFromPaths({ elementsPath, componentsPath })
-  }
-
-  timers.stop('enhance-fs-scan')
+  log(0, '✦ Creating router with', routes.size, 'routes and', Object.keys(elements).length, 'elements')
 
   const radixRouter = radix3.createRouter({
     routes: Object.fromEntries(routes),
@@ -56,12 +22,7 @@ export function createRouter (options) {
     log,
     radixRouter,
     ...options,
-    // override options with updates
     elements,
-    apiPath,
-    pagesPath,
-    elementsPath,
-    componentsPath,
   })
 
   const report = createReport({ elements, routes })

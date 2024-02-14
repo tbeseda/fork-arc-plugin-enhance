@@ -1,34 +1,46 @@
-import { cwd } from 'node:process'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createRouter, htmlSkeleton, c } from '../src/index.js'
 
+const staticRoutes = new Map()
+staticRoutes.set('/foo-bar', {
+  api: {
+    fn: {
+      get () {
+        return { json: { foo: 'bar' } }
+      },
+
+    },
+  },
+  page: { html: '<e-grandparent></e-grandparent>' },
+})
+staticRoutes.set('/foo-bar/baz', { page: { html: '<main>' } })
+staticRoutes.set('/foo-bar/baz/qux', { page: { html: '<main>' } })
+
+const staticElements = {
+  'e-grandparent': ({ html }) => html`<e-parent></e-parent>`,
+  'e-parent': ({ html }) => html`<e-child>hello</e-child>`,
+  'e-child': ({ html }) => html`<div><slot></slot> world</div>`,
+}
+
 test('smoke test', async () => {
-  const { elements, routeAndRender, routes, report } = createRouter({
-    basePath: cwd(),
-    apiPath: 'test/mocks/render-kitchen-sink/api',
-    pagesPath: 'test/mocks/render-kitchen-sink/pages',
-    elementsPath: 'test/mocks/render-kitchen-sink/elements',
-    componentsPath: 'test/mocks/render-kitchen-sink/components',
+  const router = createRouter({
+    routes: staticRoutes,
+    elements: staticElements,
     state: { title: 'foobarbaz' },
     /** @type {import('@enhance/types').EnhanceHeadFn} */
     head (payload) {
       const { store } = payload
-      console.log('     └┬─ head()')
-      console.log('      └─ incoming title:', store.title)
       return `<head><title>${store.title}</title></head>`
     },
     debug: true,
   })
 
-  report()
+  router.report()
 
-  assert.equal(routes.size, 4)
-  assert.equal(elements.size, 6)
-  const response = await routeAndRender({
-    method: 'GET',
-    path: '/foo-bar',
-  })
+  assert.ok(router.radixRouter)
+  assert.equal(router.routes.size, staticRoutes.size)
+  const response = await router.routeAndRender({ path: '/foo-bar' })
   assert.ok(response.html)
   assert.equal(typeof response.html, 'string')
 
@@ -38,3 +50,5 @@ ${htmlSkeleton(response.html)}
 ${c.pink('──────────────────────────────')}
   `)
 })
+
+test('smoke test PROMISES', async () => {})

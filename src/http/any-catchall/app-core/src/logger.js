@@ -33,9 +33,26 @@ export function createReport ({ elements, routes }) {
     out(`
 ${c.blue('⏺───')} ${c.b(c.orange('EnhanceAppCore Report'))}
   ${c.blue('○─┬─')} #elements ${c.dim(`(${elements.size})`)}
-${createTree([ ...elements.keys() ].map(e => `<${e}>`))}
+${createTree([ Object.keys(elements) ].map(e => `<${e}>`))}
   ${c.blue('●─┬─')} #router ${c.dim(`(${routes.size})`)}
 ${createTree([ ...routes.keys() ])}
     `)
   }
+}
+
+/**
+ * @param {Function} out
+ * @param {Record<string, any>} req
+ */
+export function logRequest (out = console.log, req) {
+  const { headers, method, path, requestContext } = req
+  const line = [ 0, '✧' ]
+
+  if (requestContext?.timeEpoch) { // Lambda specific
+    line.push(`[${new Date(requestContext.timeEpoch * 1000).toLocaleString()}]`)
+  }
+  line.push(method)
+  line.push(`${headers?.host || ''}${path}`)
+
+  out(...line)
 }

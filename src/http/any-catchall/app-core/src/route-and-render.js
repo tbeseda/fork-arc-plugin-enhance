@@ -1,24 +1,7 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import enhance from '@enhance/ssr'
 import headerTimers from 'header-timers'
 
-import { createElementName } from './util.js'
-
-function logLine (req) {
-  const { headers, method, path, requestContext } = req
-  const line = [ 0, '✧' ]
-  if (requestContext?.timeEpoch) { // Lambda specific
-    line.push(`[${new Date(requestContext.timeEpoch * 1000).toLocaleString()}]`)
-  }
-  line.push(method)
-  line.push(`${headers?.host || ''}${path}`)
-  return line
-}
-
-/** @type {Record<string, Function>} */
-let elementFunctions
+import { logRequest } from './logger.js'
 
 /** @type {import('./types.js').CreateEnhanceRouteAndRender} */
 export function createRouteAndRender ({
@@ -30,14 +13,9 @@ export function createRouteAndRender ({
 }) {
   // router options:
   const {
-    apiPath,
-    pagesPath,
-    elementsPath,
-    componentsPath,
     head,
     state: routerState,
     ssrOptions,
-    debug,
   } = options
 
   /** @type {import('./types.js').EnhanceRouteAndRender} */
@@ -53,7 +31,7 @@ export function createRouteAndRender ({
 
     const timers = headerTimers({ enabled: true })
 
-    if (debug) log(...logLine(req))
+    logRequest(log, req)
 
     /** @type {(import('./types.js').RouteRecord & { params?: Record<string, any> }) | null} */
     const route = radixRouter.lookup(path)
@@ -73,38 +51,42 @@ export function createRouteAndRender ({
 
     let apiResult
     if (api) {
-      log('importing api:', api)
+      timers.start('enhance-api')
+      const { fn, deferredFn } = api
+      const apiArgs = [
+        { ...req, params },
+        { state: { ...routerState, ...reqState } },
+      ]
 
-      timers.start('enhance-api', )
-
-      let apiModule
-      if (typeof api.fn?.[method] === 'function') {
-        apiModule = api.fn
-      }
-      else if (api.file?.mjs) {
-        log(`importing api: ${api.file.mjs}`)
+      if (fn && typeof fn[method] === 'function') {
+        log('executing api:', `${method}() on`, fn)
         try {
-          apiModule = await import(join(apiPath, api.file.mjs))
-        }
-        catch (err) {
-          log(0, 'api import error', err)
-          throw err
-        }
-      }
-
-      if (apiModule[method]) {
-        log(4, `executing api:`, `${method}()`)
-        try {
-          apiResult = await apiModule[method](
-            { ...req, params },
-            { state: { ...routerState, ...reqState } },
-          )
+          apiResult = await fn[method](...apiArgs)
         }
         catch (err) {
           log(0, 'api execution error', err)
           throw err
         }
       }
+      else if (deferredFn) {
+        log('importing api', deferredFn)
+        try {
+          const apiModule = await deferredFn
+
+          if (typeof apiModule[method] === 'function') {
+            log('executing api:', `${method}() on`, apiModule)
+            apiResult = await apiModule[method](...apiArgs)
+          }
+          else {
+            log('api module missing method:', method)
+          }
+        }
+        catch (err) {
+          log(0, 'deferred api import/execution error', err)
+          throw err
+        }
+      }
+
       timers.stop('enhance-api')
     }
 
@@ -128,14 +110,13 @@ export function createRouteAndRender ({
       throw new Error('404', { cause: 'route missing page' })
     }
 
-    // const pageElements = new Map()
     let pageTagName
     let pageHtml
     if (page.element) {
       const { deferredFn, fn, tagName } = page.element
       pageTagName = tagName || 'page-'
       log('creating element for', pageTagName)
-      elements.set(pageTagName, { fn: fn ? fn : await deferredFn })
+      elements[pageTagName] = fn ? fn : await deferredFn || (() => '')
       pageHtml = `<${pageTagName}></${pageTagName}>`
     }
     else if (page.html) {
@@ -146,67 +127,12 @@ export function createRouteAndRender ({
       log('reading page.deferredHtml')
       pageHtml = await page.deferredHtml
     }
-    else if (page.file) {
-      if (page.file.mjs) {
-        log(`importing page: ${page.file.mjs}`)
-        pageTagName = `page-${createElementName(page.file.mjs)}`
-        elements.set(pageTagName, { file: { mjs: page.file.mjs } })
-        pageHtml = `<${pageTagName}></${pageTagName}>`
-      }
-      else if (page.file.html) {
-        log(`reading page: ${page.file.html}`)
-        pageHtml = readFileSync(join(pagesPath, page.file.html)).toString()
-      }
-    }
-
-    // import element functions
-    timers.start('enhance-elements')
-    if (!elementFunctions || (pageTagName && !elementFunctions[pageTagName])) {
-      log(`importing ${elements.size} elements`)
-
-      elementFunctions = {}
-      for (const [ name, e ] of elements) {
-        if (e.fn) {
-          log(4, name, ':F')
-          elementFunctions[name] = e.fn
-        }
-        else if (e.file) {
-          if (e.file.component) {
-            log(4, e.file.component, ':C')
-            try {
-              const componentModule = await import(join(componentsPath, e.file.component))
-              elementFunctions[name] = componentModule.default?.render
-            }
-            catch (err) {
-              log(0, 'component import error', err)
-              throw err
-            }
-          }
-          else if (e.file.mjs) {
-            log(4, e.file.mjs, ':E')
-            try {
-              const elementModule = await import(join(elementsPath, e.file.mjs))
-              elementFunctions[name] = elementModule.default
-            }
-            catch (err) {
-              log(0, 'element import error', err)
-              throw err
-            }
-          }
-          else if (e.file.html) {
-            log(4, e.file.html, ':H')
-            const elemHtml = readFileSync(join(elementsPath, e.file.html)).toString()
-            elementFunctions[name] = ({ html }) => html`${elemHtml}`
-          }
-        }
-      }
-    }
-    timers.stop('enhance-elements')
 
     timers.start('enhance-html')
     const renderResult = await render(
       pageHtml || '',
       { req, status, state: { ...reqState, ...apiResult?.json } },
+      elements,
     )
     timers.stop('enhance-html')
 
@@ -224,7 +150,7 @@ export function createRouteAndRender ({
   }
 
   /** @type {import('./types.js').EnhanceRender} */
-  async function render (bodyString = '', payload = {}, elements = elementFunctions) {
+  async function render (bodyString = '', payload = {}, elements = {}) {
     const {
       error,
       req = {},

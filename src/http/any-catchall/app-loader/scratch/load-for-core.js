@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 // import { createRouter } from '../../app-core/src/index.js'
 
 // things to extract from the app-core
-import { routesFromPaths, elementsFromPaths } from '../../app-core/src/scan-paths.js'
 import { createElementName } from '../../app-core/src/util.js'
+import { routesFromPaths, elementsFromPaths } from '../src/scan-paths.js'
 
 // do work
 const here = dirname(fileURLToPath(import.meta.url))
@@ -21,12 +21,14 @@ const componentsPath = join(kitchenSink, 'components')
 const routes = routesFromPaths({ apiPath, pagesPath })
 const elements = elementsFromPaths({ elementsPath, componentsPath, })
 
+// timers.start('enhance-fs-scan')
+
 for (const [ , record ] of routes) {
   const { api, page } = record
 
   if (api?.file?.mjs) {
     console.log(`importing api: ${api.file.mjs}`)
-    api.fn = import(join(apiPath, api.file.mjs)) // Promise
+    api.deferredFn = import(join(apiPath, api.file.mjs)) // Promise
   }
 
   if (page?.file) {
@@ -53,6 +55,8 @@ for (const [ , record ] of routes) {
 }
 
 console.log('routes:', routes)
+
+// timers.start('enhance-elements')
 
 const elementFunctions = {}
 for (const [ name, record ] of elements) {
