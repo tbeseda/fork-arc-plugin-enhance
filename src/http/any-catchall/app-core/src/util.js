@@ -37,11 +37,13 @@ export function createReport ({ elements, routes }) {
       .join('\n')
   }
 
+  const elementNames = Object.keys(elements)
+
   return function report (out = console.log) {
     out(`
 ${c.blue('⏺───')} ${c.b(c.orange('EnhanceAppCore Report'))}
-  ${c.blue('○─┬─')} #elements ${c.dim(`(${elements.size})`)}
-${createTree([ Object.keys(elements) ].map(e => `<${e}>`))}
+  ${c.blue('○─┬─')} #elements ${c.dim(`(${elementNames.length})`)}
+${createTree(elementNames.map(e => `<${e}>`))}
   ${c.blue('●─┬─')} #router ${c.dim(`(${routes.size})`)}
 ${createTree([ ...routes.keys() ])}
     `)
@@ -53,7 +55,7 @@ ${createTree([ ...routes.keys() ])}
  * @param {Record<string, any>} req
  */
 export function logRequest (out = console.log, req) {
-  const { headers, method, path, requestContext } = req
+  const { headers, method = 'GET', path, requestContext } = req
   const line = [ 0, '✧' ]
 
   if (requestContext?.timeEpoch) { // Lambda specific

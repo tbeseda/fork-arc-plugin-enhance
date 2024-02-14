@@ -116,7 +116,19 @@ export function createRouteAndRender ({
       const { deferredFn, fn, tagName } = page.element
       pageTagName = tagName || 'page-'
       log('creating element for', pageTagName)
-      elements[pageTagName] = fn ? fn : await deferredFn || (() => '')
+      if (fn) {
+        elements[pageTagName] = fn
+      }
+      else if (deferredFn) {
+        log('importing element', deferredFn)
+        try {
+          elements[pageTagName] = (await deferredFn).default
+        }
+        catch (err) {
+          log(0, 'deferred element import error', err)
+          throw err
+        }
+      }
       pageHtml = `<${pageTagName}></${pageTagName}>`
     }
     else if (page.html) {
@@ -125,7 +137,7 @@ export function createRouteAndRender ({
     }
     else if (page.deferredHtml) {
       log('reading page.deferredHtml')
-      pageHtml = await page.deferredHtml
+      pageHtml = (await page.deferredHtml).toString()
     }
 
     timers.start('enhance-html')

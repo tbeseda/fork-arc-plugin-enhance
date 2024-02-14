@@ -4,7 +4,7 @@
 // ? namespace?
 
 import type { HttpAsyncHandler, } from '@architect/functions';
-import type { EnhanceHeadFn } from '@enhance/types';
+import type { EnhanceHeadFn, EnhanceElemFn, EnhanceApiFn } from '@enhance/types';
 import type { RadixRouter } from 'radix3';
 import type { HeaderTimers } from 'header-timers';
 
@@ -13,21 +13,22 @@ type ArcRequest = Partial<Parameters<HttpAsyncHandler>[0]>
 type ArcResponse = Partial<Exclude<Awaited<ReturnType<HttpAsyncHandler>>, void>>
 
 export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head' | 'options';
+export interface ApiDictionary {
+  [key in HTTPishMethod]: EnhanceApiFn;
+}
 
 export type RouteRecord = {
   api?: {
-    fn?: {
-      [key in HTTPishMethod]?: Function;
-    };
-    deferredFn?: Promise<Record<HTTPishMethod, Function>>;
+    fn?: ApiDictionary;
+    deferredFn?: Promise<ApiDictionary>;
   };
   page?: {
     html?: string;
     deferredHtml?: Promise<string>;
     element?: {
-      tagName?: string;
-      deferredFn?: Promise<Function>;
-      fn?: Function;
+      tagName: string; // required for element
+      fn?: EnhanceElemFn;
+      deferredFn?: Promise<{ default: EnhanceElemFn }>;
     };
   };
 }
@@ -36,7 +37,7 @@ export type RoutesManifest = Map<string, RouteRecord>;
 export type EnhanceRouterOptions = {
   routes: RoutesManifest;
   elements?: {
-    [key: string]: Function;
+    [key: string]: EnhanceElemFn;
   };
   head?: EnhanceHeadFn;
   state?: Record<string, any>;
