@@ -20,8 +20,8 @@ export function createRouter (options) {
     elementsPath = 'elements',
     componentsPath = 'components',
     // provided manifests:
-    routes,
-    elements,
+    routes = new Map(),
+    elements = new Map(),
   } = options
 
   const timers = headerTimers({ enabled: true })
@@ -31,21 +31,19 @@ export function createRouter (options) {
 
   timers.start('enhance-fs-scan')
 
-  if (!routes && (apiPath || pagesPath)) {
+  if (routes.size === 0 && (apiPath || pagesPath)) {
     log('creating routes from:'); log(4, apiPath, '+', pagesPath)
     apiPath = join(basePath, apiPath)
     pagesPath = join(basePath, pagesPath)
     routes = routesFromPaths({ apiPath, pagesPath })
   }
-  else routes = new Map()
 
-  if (!elements && (elementsPath || componentsPath)) {
+  if (elements.size === 0 && (elementsPath || componentsPath)) {
     log('scanning for elements in:'); log(4, elementsPath, '+', componentsPath)
     elementsPath = join(basePath, elementsPath)
     componentsPath = join(basePath, componentsPath)
     elements = elementsFromPaths({ elementsPath, componentsPath })
   }
-  else elements = new Map()
 
   timers.stop('enhance-fs-scan')
 

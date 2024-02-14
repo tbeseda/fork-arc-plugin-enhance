@@ -128,12 +128,23 @@ export function createRouteAndRender ({
       throw new Error('404', { cause: 'route missing page' })
     }
 
+    // const pageElements = new Map()
     let pageTagName
     let pageHtml
-    if (page.fn) {
-      pageTagName = 'page-'
-      elements.set(pageTagName, { fn: page.fn })
+    if (page.element) {
+      const { deferredFn, fn, tagName } = page.element
+      pageTagName = tagName || 'page-'
+      log('creating element for', pageTagName)
+      elements.set(pageTagName, { fn: fn ? fn : await deferredFn })
       pageHtml = `<${pageTagName}></${pageTagName}>`
+    }
+    else if (page.html) {
+      log('assigning page.html')
+      pageHtml = page.html
+    }
+    else if (page.deferredHtml) {
+      log('reading page.deferredHtml')
+      pageHtml = await page.deferredHtml
     }
     else if (page.file) {
       if (page.file.mjs) {

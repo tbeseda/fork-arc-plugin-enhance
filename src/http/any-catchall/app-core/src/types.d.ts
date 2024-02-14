@@ -13,15 +13,19 @@ export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head
 
 export type RouteRecord = {
   api?: {
-    fn?: {
-      [method in HTTPishMethod]?: Function;
-    };
+    fn?: Record<HTTPishMethod, Function> | Promise<Record<HTTPishMethod, Function>>;
     file?: {
       mjs?: string;
     };
   };
   page?: {
-    fn?: Function;
+    html?: string;
+    deferredHtml?: Promise<string>;
+    element?: {
+      tagName?: string;
+      deferredFn?: Promise<Function>;
+      fn?: Function;
+    };
     file?: {
       html?: string;
       mjs?: string;
