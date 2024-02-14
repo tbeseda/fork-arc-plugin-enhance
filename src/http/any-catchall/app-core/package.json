@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@enhance/ssr": "^3.5.1",
-    "fast-glob": "^3.3.2",
     "radix3": "^1.1.0",
     "header-timers": "0.2.0"
   },
@@ -19,7 +18,8 @@
   },
   "eslintConfig": {
     "parserOptions": {
-      "sourceType": "module"
+      "sourceType": "module",
+      "ecmaVersion": 2022
     },
     "ignorePatterns": [
       "test/mocks/**"

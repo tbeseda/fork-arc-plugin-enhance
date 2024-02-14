@@ -1,7 +1,7 @@
 import enhance from '@enhance/ssr'
 import headerTimers from 'header-timers'
 
-import { logRequest } from './logger.js'
+import { logRequest } from './util.js'
 
 /** @type {import('./types.js').CreateEnhanceRouteAndRender} */
 export function createRouteAndRender ({

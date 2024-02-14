@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 // import { createRouter } from '../../app-core/src/index.js'
 
 // things to extract from the app-core
-import { createElementName } from '../../app-core/src/util.js'
+import { createElementName } from '../src/util.js'
 import { routesFromPaths, elementsFromPaths } from '../src/scan-paths.js'
 
 // do work

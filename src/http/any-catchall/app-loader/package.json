@@ -7,6 +7,9 @@
     "test.coverage": "node --test --experimental-test-coverage **/*-test.js",
     "test.test": "node --test **/*-test.js"
   },
+  "dependencies": {
+    "fast-glob": "^3.3.2"
+  },
   "eslintConfig": {
     "parserOptions": {
       "sourceType": "module",

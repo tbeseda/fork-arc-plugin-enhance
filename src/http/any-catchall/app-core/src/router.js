@@ -2,7 +2,7 @@ import * as radix3 from 'radix3'
 import headerTimers from 'header-timers'
 
 import { createRouteAndRender } from './route-and-render.js'
-import { createLogger, createReport } from './logger.js'
+import { createLogger, createReport } from './util.js'
 
 /** @type {import('./types').CreateEnhanceRouter} */
 export function createRouter ({ debug = false, ...options }) {
@@ -25,7 +25,7 @@ export function createRouter ({ debug = false, ...options }) {
     elements,
   })
 
-  const report = createReport({ elements, routes })
+  const report = createReport({ routes, elements })
 
   return {
     options,
