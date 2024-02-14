@@ -1,7 +1,7 @@
 import { cwd } from 'node:process'
 import http from 'node:http'
 import styleTransform from '@enhance/enhance-style-transform'
-import { createRouter } from '../../../src/index.js'
+import { createRouter } from '../../../../app-core/src/index.js'
 
 const { routeAndRender, report } = createRouter({
   basePath: cwd(),
