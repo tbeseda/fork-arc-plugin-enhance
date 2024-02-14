@@ -35,7 +35,7 @@ ${c.blue('⏺───')} ${c.b(c.orange('EnhanceAppCore Report'))}
   ${c.blue('○─┬─')} #elements ${c.dim(`(${elements.size})`)}
 ${createTree([ ...elements.keys() ].map(e => `<${e}>`))}
   ${c.blue('●─┬─')} #router ${c.dim(`(${routes.size})`)}
-${createTree([ ...routes.keys() ].map(r => `/${r}`))}
+${createTree([ ...routes.keys() ])}
     `)
   }
 }

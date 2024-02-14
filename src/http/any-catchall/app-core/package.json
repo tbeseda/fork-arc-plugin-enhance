@@ -20,6 +20,9 @@
   "eslintConfig": {
     "parserOptions": {
       "sourceType": "module"
-    }
+    },
+    "ignorePatterns": [
+      "test/mocks/**"
+    ]
   }
 }
