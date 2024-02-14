@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint . --fix",
+    "test": "npm run lint && npm run test.test",
+    "test.coverage": "node --test --experimental-test-coverage **/*-test.js",
+    "test.test": "node --test **/*-test.js"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "sourceType": "module",
+      "ecmaVersion": 2022
+    }
+  }
+}
