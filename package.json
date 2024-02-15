@@ -55,6 +55,9 @@
   },
   "eslintConfig": {
     "extends": "@architect/eslint-config",
+    "parserOptions": {
+      "ecmaVersion": 2022
+    },
     "overrides": [
       {
         "files": [
