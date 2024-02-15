@@ -8,6 +8,9 @@ import loadAppConfig from './app-loader/src/index.js'
 import createEnhanceApp from './app-core/src/index.js'
 
 import defaultHead from './templates/head.mjs'
+import fingerprintPublicRefs from './transformer.mjs'
+
+const DEBUG = 0
 
 const here = dirname(fileURLToPath(import.meta.url))
 const basePath = join(here, 'node_modules', '@architect', 'views')
@@ -30,7 +33,7 @@ catch (err) {
   preflight = () => ({})
 }
 
-const config = await loadAppConfig({ basePath })
+const config = await loadAppConfig({ basePath, debug: DEBUG > 0 })
 
 const app = createEnhanceApp({
   ...config,
@@ -39,12 +42,16 @@ const app = createEnhanceApp({
     scriptTransforms: [ importTransform({ lookup: arc.static }) ],
     styleTransforms: [ styleTransform ],
   },
+  state: {},
+  debug: DEBUG > 0,
 })
 
 async function http (req) {
   try {
     const moreState = await preflight(req)
     const response = await app.routeAndRender(req, moreState)
+
+    response.html = fingerprintPublicRefs(response.html)
 
     // merge timing headers
     const headers = {
