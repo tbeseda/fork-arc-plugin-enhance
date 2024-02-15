@@ -6,15 +6,22 @@ export function preflight (req) {
   return { title: `My site - ${req.path}` }
 }
 
-export function postflight (res) {
-  return res
+export function postflight ({timers, response}) {
+  const headers = {
+    ...response.headers,
+    [timers.key]: [
+      timers.value(),
+      response.headers[timers.key]
+    ].join(', '),
+  }
+  return {...response, headers}
 }
 
-export function head () {
+export function head ({ store }) {
   return /* html */`
     <html>
       <head>
-        <title>arc-pluginless</title>
+        <title>${store.title}</title>
         <link rel="icon" href="data:;base64,iVBORw0KGgo=">
         <style>
           body {

@@ -6,18 +6,18 @@ import importTransform from '@enhance/import-transform'
 import styleTransform from '@enhance/enhance-style-transform'
 
 import loadAppConfig from '../../../../../../src/index.js'
+import createEnhanceApp from '../../../../../../../app-core/src/index.js'
 
 import { getState, head, preflight, postflight } from './helpers.mjs'
 
 const debug = true
 
 const thisDir = dirname(fileURLToPath(import.meta.url))
+const {routes, elements, timers} = await loadAppConfig({ basePath: join(thisDir, 'foo-app'), debug })
+
 const app = createEnhanceApp({
-  basePath: join(thisDir, 'foo-app'),
-  apiPath: 'api',
-  pagesPath: 'pages',
-  elementsPath: 'elements',
-  componentsPath: 'components',
+  routes,
+  elements,
   ssrOptions: {
     scriptTransforms: [ importTransform({ lookup: arc.static }) ],
     styleTransforms: [ styleTransform ],
@@ -30,13 +30,11 @@ const app = createEnhanceApp({
 if (debug) app.report()
 
 async function http (req) {
-  console.log(`${c.orange(req.method)} ${req.path}`)
-
   try {
     const moreState = await preflight(req)
     const response = await app.routeAndRender(req, moreState)
 
-    return postflight(response)
+    return postflight({ response, timers })
   }
   catch (err) {
     return {

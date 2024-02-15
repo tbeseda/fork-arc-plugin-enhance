@@ -1,5 +1,5 @@
-import { cwd } from 'node:process'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import http from 'node:http'
 
 import styleTransform from '@enhance/enhance-style-transform'
@@ -9,7 +9,8 @@ import createEnhanceApp from '../../../../app-core/src/index.js'
 
 import head from './head.js'
 
-const config = await loadAppConfig({ basePath: join(cwd(), 'foo-app') })
+const thisDir = dirname(fileURLToPath(import.meta.url))
+const config = await loadAppConfig({ basePath: join(thisDir, 'foo-app') })
 
 const app = createEnhanceApp({
   ...config,

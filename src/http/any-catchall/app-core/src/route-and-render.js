@@ -3,7 +3,6 @@ import headerTimers from 'header-timers'
 
 /** @type {import('./types.js').CreateEnhanceRouteAndRender} */
 export function createRouteAndRender ({
-  timers: routerTimers,
   log,
   radixRouter,
   elements,
@@ -17,6 +16,8 @@ export function createRouteAndRender ({
     debug
   } = options
 
+  const timers = headerTimers({ enabled: debug })
+
   /** @type {import('./types.js').EnhanceRouteAndRender} */
   async function routeAndRender (req, reqState) {
     const {
@@ -27,8 +28,6 @@ export function createRouteAndRender ({
 
     let method = reqMethod.toLowerCase()
     if (method === 'delete') method = 'destroy'
-
-    const timers = headerTimers({ enabled: debug })
 
     log.request(req)
 
@@ -150,7 +149,7 @@ export function createRouteAndRender ({
     // merge timers into apiResult.headers
     const headers = {
       ...apiResult?.headers,
-      [timers.key]: [ routerTimers?.value(), timers.value(), apiResult?.headers?.[timers.key] ].join(', '),
+      [timers.key]: [ timers.value(), apiResult?.headers?.[timers.key] ].join(', '),
     }
 
     return {
@@ -199,5 +198,6 @@ export function createRouteAndRender ({
   return {
     render,
     routeAndRender,
+    timers,
   }
 }

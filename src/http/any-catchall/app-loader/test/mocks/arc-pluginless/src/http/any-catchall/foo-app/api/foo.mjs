@@ -1,3 +1,3 @@
-export async function get (req) {
-  return { json: { foo: 'bar' } }
+export async function get (req, { state }) {
+  return { json: { ...state, foo: 'bar' } }
 }

@@ -59,9 +59,9 @@ export function createReport ({ elements, routes }) {
   return function report (out = console.log) {
     out(`
 ${c.blue('⏺───')} ${c.b(c.orange('EnhanceAppCore Report'))}
-  ${c.blue('○─┬─')} #elements ${c.dim(`(${elementNames.length})`)}
+  ${c.blue('●─┬─')} #elements ${c.dim(`(${elementNames.length})`)}
 ${createTree(elementNames.map(e => `<${e}>`))}
-  ${c.blue('●─┬─')} #router ${c.dim(`(${routes.size})`)}
+  ${c.blue('○─┬─')} #router ${c.dim(`(${routes.size})`)}
 ${createTree([ ...routes.keys() ])}
     `)
   }

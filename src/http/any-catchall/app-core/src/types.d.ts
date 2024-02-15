@@ -56,7 +56,6 @@ export type CreateRouteAndRenderOptions = (
     },
     radixRouter: RadixRouter,
     elements: EnhanceElements,
-    timers: HeaderTimers,
   }
 )
 
@@ -76,6 +75,7 @@ export type EnhanceRouteAndRender = (
 export type CreateEnhanceRouteAndRender = (options: CreateRouteAndRenderOptions) => {
   render: EnhanceRender
   routeAndRender: EnhanceRouteAndRender,
+  timers: HeaderTimers
 };
 
 export type CreateEnhanceRouter = (options: EnhanceRouterOptions) => {

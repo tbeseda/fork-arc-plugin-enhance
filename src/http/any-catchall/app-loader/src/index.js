@@ -12,7 +12,14 @@ export default async function load ({ basePath, debug = false, ...options }) {
 
   const timers = headerTimers({ enabled: true })
   function log (...args) {
-    if (debug) console.log(...args)
+    if (debug)
+      console.log(
+        ...args.map(
+          a => typeof a === 'string' && a.length > 0
+            ? `\x1b[2m${a}\x1b[22m`
+            : a
+        )
+      )
   }
 
   let {
@@ -22,7 +29,10 @@ export default async function load ({ basePath, debug = false, ...options }) {
     componentsPath = 'components',
   } = options
 
-  timers.start('enhance-fs-scan')
+  log('☆ loading routes and elements')
+
+  timers.start('enhance-elements')
+  timers.start('enhance-elements-scan')
 
   apiPath = join(basePath, apiPath)
   pagesPath = join(basePath, pagesPath)
@@ -32,9 +42,9 @@ export default async function load ({ basePath, debug = false, ...options }) {
   componentsPath = join(basePath, componentsPath)
   const elements = elementsFromPaths({ elementsPath, componentsPath })
 
-  timers.stop('enhance-load-scan')
+  timers.stop('enhance-elements-scan')
 
-  timers.start('enhance-load-build')
+  timers.start('enhance-elements-build')
 
   /** @type {import('./types.js').CoreRoutesManifest} */
   const routesForCore = new Map()
@@ -43,14 +53,14 @@ export default async function load ({ basePath, debug = false, ...options }) {
     const route = {}
 
     if (api?.mjs) {
-      log(`importing api: ${api.mjs}`)
+      log(`  importing api: ${api.mjs}`)
       route.api = { deferredFn: import(join(apiPath, api.mjs)) }
     }
 
     if (page) {
       route.page = {}
       if (page.mjs) {
-        log(`importing page: ${page.mjs}`)
+        log(`  importing page: ${page.mjs}`)
 
         route.page.element = {
           tagName: `page-${createElementName(page.mjs)}`,
@@ -59,7 +69,7 @@ export default async function load ({ basePath, debug = false, ...options }) {
       }
       else if (page.html) {
         const pageHtml = page.html
-        log(`reading page: ${pageHtml}`)
+        log(`  reading page: ${pageHtml}`)
 
         route.page.deferredHtml = new Promise((resolve) => {
           const htmlString = readFileSync(join(pagesPath, pageHtml))
@@ -76,24 +86,25 @@ export default async function load ({ basePath, debug = false, ...options }) {
   for (const [ name, record ] of elements) {
     // prefer component over mjs over html
     if (record.component) {
-      log(`importing component: ${record.component}`)
+      log(`  importing component: ${record.component}`)
       const componentModule = await import(join(componentsPath, record.component))
       elementFunctions[name] = componentModule?.default?.render
     }
     else if (record.mjs) {
-      log(`importing element: ${record.mjs}`)
+      log(`  importing element: ${record.mjs}`)
       // * if enhance-ssr supports promises, don't await
       const elemModule = await import(join(elementsPath, record.mjs))
       elementFunctions[name] = elemModule?.default
     }
     else if (record.html) {
-      log(`reading element: ${record.html}`)
+      log(`  reading element: ${record.html}`)
       const htmlString = readFileSync(join(elementsPath, record.html))
       elementFunctions[name] = () => htmlString?.toString() || ''
     }
   }
 
-  timers.stop('enhance-load-build')
+  timers.stop('enhance-elements-build')
+  timers.stop('enhance-elements')
 
   return {
     timers,
