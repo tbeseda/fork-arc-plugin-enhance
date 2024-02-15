@@ -5,14 +5,14 @@ import arc from '@architect/functions'
 import importTransform from '@enhance/import-transform'
 import styleTransform from '@enhance/enhance-style-transform'
 
-import { createRouter, htmlSkeleton, c } from '../../../../../../src/index.js'
+import loadAppConfig from '../../../../../../src/index.js'
 
 import { getState, head, preflight, postflight } from './helpers.mjs'
 
 const debug = true
 
 const thisDir = dirname(fileURLToPath(import.meta.url))
-const router = createRouter({
+const app = createEnhanceApp({
   basePath: join(thisDir, 'foo-app'),
   apiPath: 'api',
   pagesPath: 'pages',
@@ -27,29 +27,21 @@ const router = createRouter({
   debug,
 })
 
-if (debug) router.report()
+if (debug) app.report()
 
 async function http (req) {
   console.log(`${c.orange(req.method)} ${req.path}`)
 
   try {
     const moreState = await preflight(req)
-    const response = await router.routeAndRender(req, moreState)
-
-    if (debug) {
-      console.log(`
-${c.pink('───')} ${c.orange('HTML')} 💀 ${c.pink('───────────────────')}
-${htmlSkeleton(response?.html)}
-${c.pink('──────────────────────────────')}
-    `)
-    }
+    const response = await app.routeAndRender(req, moreState)
 
     return postflight(response)
   }
   catch (err) {
     return {
       statusCode: Number(err.message),
-      html: await router.render(`
+      html: await app.render(`
         <main>
           <h1>${err.message}</h1>
           <h2>${err.cause}</h2>

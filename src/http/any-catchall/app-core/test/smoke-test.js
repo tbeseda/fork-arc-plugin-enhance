@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-import { createRouter } from '../src/index.js'
+import createRouter from '../src/index.js'
 
 const PRINT = true // toggle to see html output
 const here = dirname(fileURLToPath(import.meta.url))

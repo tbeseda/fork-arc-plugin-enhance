@@ -1,40 +1,27 @@
 import { cwd } from 'node:process'
+import { join } from 'node:path'
 import http from 'node:http'
-import styleTransform from '@enhance/enhance-style-transform'
-import { createRouter } from '../../../../app-core/src/index.js'
 
-const { routeAndRender, report } = createRouter({
-  basePath: cwd(),
-  apiPath: 'foo-app/api',
-  pagesPath: 'foo-app/pages',
-  elementsPath: 'foo-app/elements',
-  componentsPath: 'foo-app/components',
+import styleTransform from '@enhance/enhance-style-transform'
+
+import loadAppConfig from '../../../../app-loader/src/index.js'
+import createEnhanceApp from '../../../../app-core/src/index.js'
+
+import head from './head.js'
+
+const config = await loadAppConfig({ basePath: join(cwd(), 'foo-app') })
+
+const app = createEnhanceApp({
+  ...config,
   ssrOptions: {
     styleTransforms: [ styleTransform ],
   },
   state: { title: 'foobarbaz' },
-  head (payload) {
-    return /* html */`
-<html>
-  <head>
-    <title>vanilla http server</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <style>
-      body {
-        font-family: sans-serif;
-      }
-      main {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-    </style>
-  </head>`.trim()
-  },
+  head,
   debug: true,
 })
 
-report()
+app.report()
 
 const server = http.createServer(async (req, res) => {
   const headers = Object.keys(req.headers).reduce((acc, key) => {
@@ -42,20 +29,40 @@ const server = http.createServer(async (req, res) => {
     return acc
   }, {})
 
-  const response = await routeAndRender({
-    path: req.url,
-    headers,
-    method: req.method || 'GET',
-  })
+  let response
+  try {
+    response = await app.routeAndRender({
+      headers,
+      path: req.url,
+      // @ts-ignore
+      method: req.method,
+    })
 
-  res.writeHead(
-    response.status || 200,
-    {
-      ...response.headers,
+    res.writeHead(
+      response.status || 200,
+      {
+        ...response.headers,
+        'content-type': 'text/html; charset=utf-8',
+      },
+    )
+    res.end(response.html || '')
+  } catch (err) {
+    const status = Number(err.message) || 500
+    const html = await app.render(`
+        <main>
+          <h1>${err.message}</h1>
+          <h2>${err.cause}</h2>
+          <p>
+            <pre>${err.stack}</pre>
+          </p>
+          <error-help></error-help>
+        </main>`)
+    res.writeHead(status, {
       'content-type': 'text/html; charset=utf-8',
-    },
-  )
-  res.end(response.html || '')
+    })
+    res.end(html)
+  }
+
 })
 
 server.listen(3000, () => {
