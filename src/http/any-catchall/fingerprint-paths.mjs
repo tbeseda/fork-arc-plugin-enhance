@@ -33,7 +33,7 @@ export default function fingerprintPublicRefs (str) {
   return replaceEvery(str, staticMapped)
 }
 
-function replaceEvery (str, staticMapped) {
+export function replaceEvery (str, staticMapped) {
   const re = new RegExp(
     Object.keys(staticMapped)
       .sort()

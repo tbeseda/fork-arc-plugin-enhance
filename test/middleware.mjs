@@ -24,4 +24,4 @@ test('Shut down local server', async t => {
   await sandbox.end()
   t.pass('Shut down Sandbox')
   t.end()
-}) === 'one'
+})
