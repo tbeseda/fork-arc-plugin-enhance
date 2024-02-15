@@ -11,25 +11,27 @@ Create an intermediary library between `@enhance/arc-plugin-enhance` and `@enhan
 
 - **scope:** create router from pre-loaded routes Map. marshall pre-defined element functions. return a method `routeAndRender()` that does:
   - `req` → { route, execute api, render template, return } → `result`
+- Agnostic to Architect (mostly - see below about i/o)
+  - this library doesn't consider many Arc things or Arc-specific parts of `arc-plugin-enhance`.
 - **more easily tested**
 - adaptable to other Node.js servers - even other runtimes like Deno and the browser
   - there are no Node.js dependencies in this library
-  - also, this library doesn't consider many Arc things or Arc-specific parts of `arc-plugin-enhance`.
 
 ### also...
 
 - use `@architect/function#http`-style input and output
-  - adapters could be used to convert to/from other formats like native `IncomingMessage` and `ServerResponse` - the advantag here is that Core doesn't care
-- outsource routing to external dep
-  - probably require some adapting to fit Enhance path param API
+  - adapters could be used to convert to/from other formats like native `IncomingMessage` and `ServerResponse` - the advantag here is that implementation is above Core
+- outsource routing to external dep (not a hard requirement, but many benefits)
+  - will require some adapting to fit Enhance path param API
 - don't swallow user-land exceptions
-- core router doesn't _render_ errors, just throws
+  - the Core consumer can handle errors as it sees fit
+- Core router doesn't _render_ errors, just throws
   - only throws on missing or incomplete route: `err.message` is `"404"`
   - if user-land code throws, log the exception and throw
-- don't search for head file
-  - allow head _function_ to be provided
-- don't load state pre-Enhance api fn (so no preflight)
-  - do allow initial router state to be provided
+- don't search for head file - but allow it to be provided
+- don't load state for api fn (so no preflight)
+  - but allow additional state at request-time for `routeAndRender()`
+  - also allow initial router state to be provided
 - expose decent type defs for configuration and returned values
 
 ## notes

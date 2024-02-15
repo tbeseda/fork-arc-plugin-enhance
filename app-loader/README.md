@@ -12,12 +12,17 @@ That's routes (from api and pages) and elements from [from elements (mjs and htm
 
 ### also...
 
-- be the bridge between the Arc plugin and "Core"
+- be the bridge between a server env (like `arc-plugin-enhance`) and "Core"
+- **more easily tested**
 - defaults to the well-established Enhance app file structure
-  - not concerned with `head` or `preflight`
+  - though, not concerned with `head` or `preflight`
 - be performant as possible
   - promises help to defer work until needed
 - good IntelliSense
+
+## next
+
+- [ ] page tag names aren't 1:1 with current implementation
 
 ## samples
 
