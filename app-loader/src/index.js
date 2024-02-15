@@ -48,19 +48,20 @@ export default async function load ({ basePath, debug = false, ...options }) {
 
   /** @type {import('./types.js').CoreRoutesManifest} */
   const routesForCore = new Map()
-  for (const [ path, { api, page } ] of routes) {
+  for (const [ p, { api, page } ] of routes) {
+    const path = p.replace(/\$/g, ':')
     /** @type {import('./types.js').CoreRouteRecord} */
     const route = {}
 
     if (api?.mjs) {
-      log(`  importing api: ${api.mjs}`)
+      log(`  importing api "${api.mjs}" for route: ${path}`)
       route.api = { deferredFn: import(join(apiPath, api.mjs)) }
     }
 
     if (page) {
       route.page = {}
       if (page.mjs) {
-        log(`  importing page: ${page.mjs}`)
+        log(`  importing page "${page.mjs}" for route: ${path}`)
 
         route.page.element = {
           tagName: `page-${createElementName(page.mjs)}`,
@@ -69,7 +70,7 @@ export default async function load ({ basePath, debug = false, ...options }) {
       }
       else if (page.html) {
         const pageHtml = page.html
-        log(`  reading page: ${pageHtml}`)
+        log(`  reading page "${pageHtml}" for route: ${path}`)
 
         route.page.deferredHtml = new Promise((resolve) => {
           const htmlString = readFileSync(join(pagesPath, pageHtml))

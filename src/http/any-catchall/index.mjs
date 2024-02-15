@@ -8,7 +8,7 @@ import fingerprintPublicRefs from './fingerprint-paths.mjs'
 import renderError from './render-error.mjs'
 import { findPreflightFn, mergeTimingHeaders } from './util.mjs'
 
-const DEBUG = 0
+const DEBUG = 2 // 0 to 2
 
 const here = dirname(fileURLToPath(import.meta.url)) // SOMEDAY: import.meta.dirname
 const basePath = join(here, 'node_modules', '@architect', 'views')
@@ -22,11 +22,12 @@ async function http (req) {
   try {
     const moreState = await preflight(req)
     const response = await app.routeAndRender(req, moreState)
+    let { html, headers } = response
 
-    response.html = fingerprintPublicRefs(response.html)
-    const headers = mergeTimingHeaders(response.headers, config.timers)
+    html = fingerprintPublicRefs(html)
+    headers = mergeTimingHeaders(headers, config.timers)
 
-    return { ...response, headers }
+    return { ...response, html, headers }
   }
   catch (err) {
     return renderError(app, err)

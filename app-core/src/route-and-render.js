@@ -45,7 +45,11 @@ export function createRouteAndRender ({
       throw new Error('404', { cause: 'route requires api and/or page' })
     }
 
-    log('route:'); log(4, 'api: ', api || 'none'); log(4, 'page:', page || 'none')
+    log(`routing "${path}" with:`, `
+     api: ${api ? JSON.stringify(api) : 'no'}
+     page: ${page ? JSON.stringify(page) : 'no'}
+     params: ${JSON.stringify(params) || 'none'}
+    `)
 
     let apiResult
     if (api) {
@@ -57,7 +61,7 @@ export function createRouteAndRender ({
       ]
 
       if (fn && typeof fn[method] === 'function') {
-        log('executing api:', `${method}() on`, fn)
+        log('executing api', `${method}()`)
         try {
           apiResult = await fn[method](...apiArgs)
         }
@@ -67,12 +71,12 @@ export function createRouteAndRender ({
         }
       }
       else if (deferredFn) {
-        log('importing api', deferredFn)
+        log('resolving deffered api function')
         try {
           const apiModule = await deferredFn
 
           if (typeof apiModule[method] === 'function') {
-            log('executing api:', `${method}() on`, apiModule)
+            log('executing api', `${method}()`)
             apiResult = await apiModule[method](...apiArgs)
           }
           else {
@@ -113,28 +117,29 @@ export function createRouteAndRender ({
     if (page.element) {
       const { deferredFn, fn, tagName } = page.element
       pageTagName = tagName || 'page-'
-      log('creating element for', pageTagName)
+      log(`creating element for <${pageTagName}>`)
       if (fn) {
+        log('using page element function')
         elements[pageTagName] = fn
       }
       else if (deferredFn) {
-        log('importing element', deferredFn)
+        log('resolving deferred page element function')
         try {
           elements[pageTagName] = (await deferredFn).default
         }
         catch (err) {
-          log(0, 'deferred element import error', err)
+          log(0, 'deferred page element import error', err)
           throw err
         }
       }
       pageHtml = `<${pageTagName}></${pageTagName}>`
     }
     else if (page.html) {
-      log('assigning page.html')
+      log('using static page html')
       pageHtml = page.html
     }
     else if (page.deferredHtml) {
-      log('reading page.deferredHtml')
+      log('resolving deferred page html')
       pageHtml = (await page.deferredHtml).toString()
     }
 
@@ -171,7 +176,7 @@ export function createRouteAndRender ({
 
     let headString = ''
     if (typeof head === 'function') {
-      log(`running head({ status: ${status}, ... })`)
+      log(`executing head({ status: ${status}, ... })`)
       headString = head({
         // @ts-ignore // EnhanceHeadFnArg is probably too strict
         req,
