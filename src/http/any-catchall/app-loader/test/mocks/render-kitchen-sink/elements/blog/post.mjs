@@ -1,4 +1,3 @@
-/** @type {import('@enhance/types').EnhanceElemFn} */
 export default function ({ html, state: { store } }) {
   const { from, title } = store
   console.log('     └┬─ blog/post.mjs')

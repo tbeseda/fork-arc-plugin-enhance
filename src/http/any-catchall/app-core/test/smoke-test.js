@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 import { createRouter } from '../src/index.js'
 
-const PRINT = true
+const PRINT = true // toggle to see html output
 const here = dirname(fileURLToPath(import.meta.url))
 
 const state = { title: 'foobarbaz' }

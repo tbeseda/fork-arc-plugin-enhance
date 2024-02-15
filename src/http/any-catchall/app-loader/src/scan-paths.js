@@ -28,7 +28,7 @@ export function routesFromPaths ({ apiPath, pagesPath }) {
       .replace(/^/, '/')
       .replace(/\.mjs$/, '')
       .replace(/index$/, '')
-    routes.set(route, { api: { file: { mjs: filename } } })
+    routes.set(route, { api: {  mjs: filename } })
   }
 
   const pageFilenames = pagesPath
@@ -49,15 +49,12 @@ export function routesFromPaths ({ apiPath, pagesPath }) {
       if (existingRoute) {
         existingRoute.page = {
           ...existingRoute.page,
-          file: {
-            ...existingRoute.page?.file,
-            [ext]: filename,
-          },
+          [ext]: filename,
         }
       }
     }
     else {
-      routes.set(route, { page: { file: { [ext]: filename } } })
+      routes.set(route, { page: { [ext]: filename } })
     }
   }
 
@@ -80,26 +77,22 @@ export function elementsFromPaths ({ elementsPath, componentsPath }) {
     const ext = filename.split('.').at(-1)
     if (!ext) continue
 
-    // element name should be lowercase and kebab-ed
     const name = createElementName(filename)
 
     if (elements.has(name)) {
       const currentElement = elements.get(name)
-      const currentFile = currentElement?.file?.[ext]
+      const currentFile = currentElement?.[ext]
 
       if (
         currentElement
         //  not set      OR       least nested file wins
-        && (!currentFile || currentFile.length < filename.length)
+        && (!currentFile || currentFile.split('/').length > filename.split('/').length)
       ) {
-        currentElement.file = {
-          ...currentElement.file,
-          [ext]: filename,
-        }
+        currentElement[ext] = filename
       }
     }
     else {
-      elements.set(name, { file: { [ext]: filename } })
+      elements.set(name, { [ext]: filename })
     }
   }
 
@@ -108,23 +101,21 @@ export function elementsFromPaths ({ elementsPath, componentsPath }) {
     : []
   for (const filename of componentFiles) {
     const name = createElementName(filename)
+
     if (elements.has(name)) {
       const currentElement = elements.get(name)
-      const currentFile = currentElement?.file?.component
+      const currentFile = currentElement?.component
 
       if (
         currentElement
         //  not set      OR       least nested file wins
-        && (!currentFile || currentFile.length < filename.length)
+        && (!currentFile || currentFile.split('/').length > filename.split('/').length)
       ) {
-        currentElement.file = {
-          ...currentElement.file,
-          component: filename,
-        }
+        currentElement.component = filename
       }
     }
     else {
-      elements.set(name, { file: { component: filename } })
+      elements.set(name, { component: filename })
     }
   }
 

@@ -1,104 +1,48 @@
 /// <reference types="node" />
 
-import type { HttpAsyncHandler, } from '@architect/functions';
-import type { EnhanceHeadFn } from '@enhance/types';
-import type { RadixRouter } from 'radix3';
+// * EnhanceLoad's main job:
+//   transforms ElementsManifest into EnhanceElements
+//   and RoutesManifest into CoreRoutesManifest
+
 import type { HeaderTimers } from 'header-timers';
+import type {
+  EnhanceElements,
+  RouteRecord as CoreRouteRecord,
+  RoutesManifest as CoreRoutesManifest,
+} from '../../app-core/src/types';
 
-// I can fix this nonsense by updating @architect/functions types
-type ArcRequest = Partial<Parameters<HttpAsyncHandler>[0]>
-type ArcResponse = Partial<Exclude<Awaited<ReturnType<HttpAsyncHandler>>, void>>
-
-export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head' | 'options';
+export type { CoreRouteRecord, CoreRoutesManifest, EnhanceElements };
 
 export type RouteRecord = {
   api?: {
-    fn?: Record<HTTPishMethod, Function>;
-    deferredFn?: Promise<Record<HTTPishMethod, Function>>;
-    file?: {
-      mjs?: string;
-    };
+    mjs?: string;
   };
   page?: {
     html?: string;
-    deferredHtml?: Promise<string>;
-    element?: {
-      tagName?: string;
-      deferredFn?: Promise<Function>;
-      fn?: Function;
-    };
-    file?: {
-      html?: string;
-      mjs?: string;
-    };
+    mjs?: string;
   };
 }
 export type RoutesManifest = Map<string, RouteRecord>;
 
 export type ElementRecord = {
-  fn?: Function;
-  file?: {
-    html?: string;
-    mjs?: string;
-    component?: string;
-  };
+  html?: string;
+  mjs?: string;
+  component?: string;
 }
 export type ElementsManifest = Map<string, ElementRecord>;
 
-export type EnhanceRouterOptions = {
+export type LoadOptions = {
   basePath: string;
   apiPath?: string;
   pagesPath?: string;
   elementsPath?: string;
   componentsPath?: string;
-  routes?: RoutesManifest;
-  elements?: ElementsManifest;
-  head?: EnhanceHeadFn;
-  state?: Record<string, any>;
-  ssrOptions?: Record<string, any>;
   debug?: boolean;
 };
 
-export type CreateRouteAndRenderOptions = (
-  EnhanceRouterOptions & {
-    log: Function,
-    radixRouter: RadixRouter,
-    elements: ElementsManifest,
-    apiPath: string,
-    pagesPath: string,
-    elementsPath: string,
-    componentsPath: string,
-    timers: HeaderTimers,
-  }
-)
-
-export type RouteAndRenderRequest = (ArcRequest & Record<string, any>);
-export type RouteAndRenderResult = Promise<(ArcResponse & Record<string, any>)>;
-
-export type EnhanceRender = (
-  string: string,
-  store?: { req?: ArcRequest, status?: number, error?: any, state?: Record<string, any> },
-  elements?: Record<string, Function>
-) => Promise<string>;
-export type EnhanceRouteAndRender = (
-  req: RouteAndRenderRequest,
-  state?: Record<string, any>
-) => Promise<RouteAndRenderResult>;
-
-export type CreateEnhanceRouteAndRender = (options: CreateRouteAndRenderOptions) => {
-  render: EnhanceRender
-  routeAndRender: EnhanceRouteAndRender,
-};
-
-export type CreateEnhanceRouter = (options: EnhanceRouterOptions) => {
-  options: EnhanceRouterOptions;
-  routes: RoutesManifest;
-  elements: ElementsManifest;
-  radixRouter: RadixRouter;
+export type EnhanceLoad = (options: LoadOptions) => {
+  routes: CoreRoutesManifest;
+  elements: EnhanceElements;
   timers: HeaderTimers;
-  log: Function;
-  report: Function;
-  render: EnhanceRender;
-  routeAndRender: EnhanceRouteAndRender;
 };
 

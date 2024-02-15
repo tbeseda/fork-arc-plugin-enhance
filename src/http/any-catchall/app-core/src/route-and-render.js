@@ -14,6 +14,7 @@ export function createRouteAndRender ({
     head,
     state: routerState,
     ssrOptions,
+    debug
   } = options
 
   /** @type {import('./types.js').EnhanceRouteAndRender} */
@@ -27,7 +28,7 @@ export function createRouteAndRender ({
     let method = reqMethod.toLowerCase()
     if (method === 'delete') method = 'destroy'
 
-    const timers = headerTimers({ enabled: true })
+    const timers = headerTimers({ enabled: debug })
 
     log.request(req)
 

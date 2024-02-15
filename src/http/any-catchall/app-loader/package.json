@@ -8,12 +8,16 @@
     "test.test": "node --test **/*-test.js"
   },
   "dependencies": {
-    "fast-glob": "^3.3.2"
+    "fast-glob": "^3.3.2",
+    "header-timers": "^0.2.0"
   },
   "eslintConfig": {
     "parserOptions": {
       "sourceType": "module",
       "ecmaVersion": 2022
-    }
+    },
+    "ignorePatterns": [
+      "test/mocks/**"
+    ]
   }
 }

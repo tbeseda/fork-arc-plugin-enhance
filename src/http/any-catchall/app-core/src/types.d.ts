@@ -12,10 +12,15 @@ import type { HeaderTimers } from 'header-timers';
 type ArcRequest = Partial<Parameters<HttpAsyncHandler>[0]>
 type ArcResponse = Partial<Exclude<Awaited<ReturnType<HttpAsyncHandler>>, void>>
 
+export type { EnhanceElemFn }
+
 export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head' | 'options';
 export interface ApiDictionary {
   [key in HTTPishMethod]: EnhanceApiFn;
 }
+export interface EnhanceElements {
+  [key: string]: EnhanceElemFn;
+};
 
 export type RouteRecord = {
   api?: {
@@ -36,9 +41,7 @@ export type RoutesManifest = Map<string, RouteRecord>;
 
 export type EnhanceRouterOptions = {
   routes: RoutesManifest;
-  elements?: {
-    [key: string]: EnhanceElemFn;
-  };
+  elements?: EnhanceElements
   head?: EnhanceHeadFn;
   state?: Record<string, any>;
   ssrOptions?: Record<string, any>;
@@ -52,7 +55,7 @@ export type CreateRouteAndRenderOptions = (
       request: (req: ArcRequest) => void;
     },
     radixRouter: RadixRouter,
-    elements: Record<string, Function>,
+    elements: EnhanceElements,
     timers: HeaderTimers,
   }
 )
@@ -63,7 +66,7 @@ export type RouteAndRenderResult = Promise<(ArcResponse & Record<string, any>)>;
 export type EnhanceRender = (
   string: string,
   store?: { req?: ArcRequest, status?: number, error?: any, state?: Record<string, any> },
-  elements?: Record<string, Function>
+  elements?: EnhanceElements
 ) => Promise<string>;
 export type EnhanceRouteAndRender = (
   req: RouteAndRenderRequest,
@@ -78,7 +81,7 @@ export type CreateEnhanceRouteAndRender = (options: CreateRouteAndRenderOptions)
 export type CreateEnhanceRouter = (options: EnhanceRouterOptions) => {
   options: EnhanceRouterOptions;
   routes: RoutesManifest;
-  elements: Record<string, Function>;
+  elements: EnhanceElements;
   radixRouter: RadixRouter;
   timers: HeaderTimers;
   log: Function;
