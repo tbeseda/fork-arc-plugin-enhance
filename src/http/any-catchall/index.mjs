@@ -4,35 +4,19 @@ import { fileURLToPath } from 'node:url'
 import arc from '@architect/functions'
 import importTransform from '@enhance/import-transform'
 import styleTransform from '@enhance/enhance-style-transform'
-import loadAppConfig from './app-loader/src/index.js'
-import createEnhanceApp from './app-core/src/index.js'
+import loadAppConfig from '../../../app-loader/src/index.js'
+import createEnhanceApp from '../../../app-core/src/index.js'
 
-import defaultHead from './templates/head.mjs'
-import fingerprintPublicRefs from './transformer.mjs'
+import fingerprintPublicRefs from './fingerprint-paths.mjs'
+import { findHeadFn, findPreflightFn, mergeTimingHeaders } from './util.mjs'
 
 const DEBUG = 0
 
 const here = dirname(fileURLToPath(import.meta.url))
 const basePath = join(here, 'node_modules', '@architect', 'views')
 
-let head
-try {
-  const headModule = await import(join(basePath, 'head.mjs'))
-  head = headModule.default
-}
-catch (err) {
-  head = defaultHead
-}
-
-let preflight
-try {
-  const preflightModule = await import(join(basePath, 'preflight.mjs'))
-  preflight = preflightModule.default
-}
-catch (err) {
-  preflight = () => ({})
-}
-
+const head = await findHeadFn(basePath)
+const preflight = await findPreflightFn(basePath)
 const config = await loadAppConfig({ basePath, debug: DEBUG > 0 })
 
 const app = createEnhanceApp({
@@ -42,7 +26,7 @@ const app = createEnhanceApp({
     scriptTransforms: [ importTransform({ lookup: arc.static }) ],
     styleTransforms: [ styleTransform ],
   },
-  state: {},
+  state: {}, // * New
   debug: DEBUG > 0,
 })
 
@@ -52,15 +36,7 @@ async function http (req) {
     const response = await app.routeAndRender(req, moreState)
 
     response.html = fingerprintPublicRefs(response.html)
-
-    // merge timing headers
-    const headers = {
-      ...response.headers,
-      [config.timers.key]: [
-        config.timers.value(),
-        response.headers?.[config.timers.key],
-      ].join(', '),
-    }
+    const headers = mergeTimingHeaders(response.headers, app.timers)
 
     return { ...response, headers }
   }
