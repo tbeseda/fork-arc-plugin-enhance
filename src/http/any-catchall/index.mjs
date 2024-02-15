@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import arc from '@architect/functions'
 
-import createApp from './create-app.mjs'
+import createEnhance from './create-app.mjs'
 import fingerprintPublicRefs from './fingerprint-paths.mjs'
 import renderError from './render-error.mjs'
 import { findPreflightFn, mergeTimingHeaders } from './util.mjs'
@@ -13,7 +13,7 @@ const DEBUG = 0
 const here = dirname(fileURLToPath(import.meta.url)) // SOMEDAY: import.meta.dirname
 const basePath = join(here, 'node_modules', '@architect', 'views')
 
-const app = await createApp({ basePath, DEBUG })
+const { app, config } = await createEnhance({ basePath, DEBUG })
 const preflight = await findPreflightFn(basePath)
 
 async function http (req) {
@@ -24,7 +24,7 @@ async function http (req) {
     const response = await app.routeAndRender(req, moreState)
 
     response.html = fingerprintPublicRefs(response.html)
-    const headers = mergeTimingHeaders(response.headers, app.timers)
+    const headers = mergeTimingHeaders(response.headers, config.timers)
 
     return { ...response, headers }
   }

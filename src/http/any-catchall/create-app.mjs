@@ -19,5 +19,5 @@ export default async function loadAndCreateApp ({ basePath, DEBUG = 0 }) {
     state: {}, // * New
     debug: DEBUG > 1,
   })
-  return app
+  return { app, config }
 }
