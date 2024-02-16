@@ -16,9 +16,9 @@ test('generated routes', async () => {
     pagesPath: join(basePath, ...pagesPathParts),
   })
 
-  // console.log(routes)
+  // console.log('routes', routes)
 
-  assert.equal(routes.size, 4)
+  assert.equal(routes.size, 7)
 
   const apiOnly = routes.get('/api-only')
   assert.equal(apiOnly?.api?.mjs, 'api-only.mjs')
@@ -41,6 +41,8 @@ test('generated elements', async () => {
     elementsPath: join(basePath, ...elementsPathParts),
     componentsPath: join(basePath, ...componentsPathParts),
   })
+
+  // console.log('elements', elements)
 
   assert.equal(elements.size, 6)
 

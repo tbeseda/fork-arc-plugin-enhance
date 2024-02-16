@@ -15,10 +15,10 @@ type ArcResponse = Partial<Exclude<Awaited<ReturnType<HttpAsyncHandler>>, void>>
 export type { EnhanceElemFn }
 
 export type HTTPishMethod = 'get' | 'post' | 'put' | 'patch' | 'destroy' | 'head' | 'options';
-export interface ApiDictionary {
+export type ApiDictionary = {
   [key in HTTPishMethod]: EnhanceApiFn;
 }
-export interface EnhanceElements {
+export type EnhanceElements = {
   [key: string]: EnhanceElemFn;
 };
 

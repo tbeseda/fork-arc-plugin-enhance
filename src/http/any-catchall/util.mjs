@@ -5,6 +5,7 @@ import defaultHead from './templates/head.mjs'
 let headFn
 export async function findHeadFn (basePath) {
   try {
+    // TODO: check if exists and throw if error importing
     const headModule = await import(join(basePath, 'head.mjs'))
     headFn = headModule.default
   }
@@ -17,6 +18,7 @@ export async function findHeadFn (basePath) {
 let preflight
 export async function findPreflightFn (basePath) {
   try {
+    // TODO: check if exists and throw if error importing
     const preflightModule = await import(join(basePath, 'preflight.mjs'))
     preflight = preflightModule.default
   }

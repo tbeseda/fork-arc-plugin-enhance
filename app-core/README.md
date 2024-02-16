@@ -55,7 +55,7 @@ Create an intermediary library between `@enhance/arc-plugin-enhance` and `@enhan
 - [ ] add middleware considerations
 - [x] expand options/config to allow pre-loaded routes, handlers, pages, and elements
 - [x] swap linter config
-- [ ] drop into existing arc-plugin-enhance as sidecar, run tests
+- [x] drop into existing arc-plugin-enhance as sidecar, run tests
 - [ ] gather feedback around API and general approach
 - [ ] plenty more smol things
 

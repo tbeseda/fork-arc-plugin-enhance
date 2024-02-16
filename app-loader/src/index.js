@@ -48,6 +48,9 @@ export default async function load ({ basePath, debug = false, ...options }) {
 
   /** @type {import('./types.js').CoreRoutesManifest} */
   const routesForCore = new Map()
+  /** @type {import('./types.js').EnhanceElements} */
+  const elementFunctions = {}
+
   for (const [ p, { api, page } ] of routes) {
     const path = p.replace(/\$/g, ':')
     /** @type {import('./types.js').CoreRouteRecord} */
@@ -62,10 +65,16 @@ export default async function load ({ basePath, debug = false, ...options }) {
       route.page = {}
       if (page.mjs) {
         log(`  importing page "${page.mjs}" for route: ${path}`)
+        const tagName = `page-${createElementName(page.mjs)}`
+        const deferredFn = import(join(pagesPath, page.mjs))
+
+        // ? should this also be added to elements?
+        // Core's routeAndRender() does load it in elements for @enhance/ssr
+        // elementFunctions[tagName] = await deferredFn
 
         route.page.element = {
-          tagName: `page-${createElementName(page.mjs)}`,
-          deferredFn: import(join(pagesPath, page.mjs)),
+          tagName,
+          deferredFn,
         }
       }
       else if (page.html) {
@@ -82,24 +91,22 @@ export default async function load ({ basePath, debug = false, ...options }) {
     routesForCore.set(path, route)
   }
 
-  /** @type {import('./types.js').EnhanceElements} */
-  const elementFunctions = {}
-  for (const [ name, record ] of elements) {
+  for (const [ name, { component, mjs, html } ] of elements) {
     // prefer component over mjs over html
-    if (record.component) {
-      log(`  importing component: ${record.component}`)
-      const componentModule = await import(join(componentsPath, record.component))
+    if (component) {
+      log(`  importing component: ${component}`)
+      const componentModule = await import(join(componentsPath, component))
       elementFunctions[name] = componentModule?.default?.render
     }
-    else if (record.mjs) {
-      log(`  importing element: ${record.mjs}`)
+    else if (mjs) {
+      log(`  importing element: ${mjs}`)
       // * if enhance-ssr supports promises, don't await
-      const elemModule = await import(join(elementsPath, record.mjs))
+      const elemModule = await import(join(elementsPath, mjs))
       elementFunctions[name] = elemModule?.default
     }
-    else if (record.html) {
-      log(`  reading element: ${record.html}`)
-      const htmlString = readFileSync(join(elementsPath, record.html))
+    else if (html) {
+      log(`  reading element: ${html}`)
+      const htmlString = readFileSync(join(elementsPath, html))
       elementFunctions[name] = () => htmlString?.toString() || ''
     }
   }

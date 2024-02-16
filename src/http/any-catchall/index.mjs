@@ -8,7 +8,7 @@ import fingerprintPublicRefs from './fingerprint-paths.mjs'
 import renderError from './render-error.mjs'
 import { findPreflightFn, mergeTimingHeaders } from './util.mjs'
 
-const DEBUG = 2 // 0 to 2
+const DEBUG = 0 // 0 to 2
 
 const here = dirname(fileURLToPath(import.meta.url)) // SOMEDAY: import.meta.dirname
 const basePath = join(here, 'node_modules', '@architect', 'views')
