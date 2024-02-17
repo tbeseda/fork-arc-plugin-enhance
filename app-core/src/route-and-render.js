@@ -112,6 +112,7 @@ export function createRouteAndRender ({
       throw new Error('404', { cause: 'route missing page' })
     }
 
+    timers.start('enhance-page')
     let pageTagName
     let pageHtml
     if (page.element) {
@@ -141,15 +142,17 @@ export function createRouteAndRender ({
     else if (page.deferredHtml) {
       log('resolving deferred page html')
       pageHtml = (await page.deferredHtml).toString()
+    } else {
+      log('no page element or html')
+      throw new Error('404', { cause: 'no page element or html' })
     }
+    timers.stop('enhance-page')
 
-    timers.start('enhance-html')
     const renderResult = await render(
       pageHtml || '',
       { req, status, state: { ...reqState, ...apiResult?.json } },
       elements,
     )
-    timers.stop('enhance-html')
 
     // merge timers into apiResult.headers
     const headers = {
@@ -177,6 +180,7 @@ export function createRouteAndRender ({
     let headString = ''
     if (typeof head === 'function') {
       log(`executing head({ status: ${status}, ... })`)
+      timers.start('enhance-head')
       headString = head({
         // @ts-ignore // EnhanceHeadFnArg is probably too strict
         req,
@@ -185,8 +189,10 @@ export function createRouteAndRender ({
         error,
         store,
       })
+      timers.stop('enhance-head')
     }
 
+    timers.start('enhance-html')
     const html = enhance({
       elements,
       initialState: {
@@ -195,6 +201,7 @@ export function createRouteAndRender ({
       },
       ...ssrOptions,
     })
+    timers.stop('enhance-html')
 
     log('rendering HTML')
     return html`${headString}${bodyString}`

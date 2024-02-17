@@ -31,8 +31,7 @@ export default async function load ({ basePath, debug = false, ...options }) {
 
   log('☆ loading routes and elements')
 
-  timers.start('enhance-elements')
-  timers.start('enhance-elements-scan')
+  timers.start('enhance-fs-scan')
 
   apiPath = join(basePath, apiPath)
   pagesPath = join(basePath, pagesPath)
@@ -42,15 +41,14 @@ export default async function load ({ basePath, debug = false, ...options }) {
   componentsPath = join(basePath, componentsPath)
   const elements = elementsFromPaths({ elementsPath, componentsPath })
 
-  timers.stop('enhance-elements-scan')
-
-  timers.start('enhance-elements-build')
+  timers.stop('enhance-fs-scan')
 
   /** @type {import('./types.js').CoreRoutesManifest} */
   const routesForCore = new Map()
   /** @type {import('./types.js').EnhanceElements} */
   const elementFunctions = {}
 
+  timers.start('enhance-routes')
   for (const [ p, { api, page } ] of routes) {
     const path = p.replace(/\$/g, ':')
     /** @type {import('./types.js').CoreRouteRecord} */
@@ -87,7 +85,9 @@ export default async function load ({ basePath, debug = false, ...options }) {
 
     routesForCore.set(path, route)
   }
+  timers.stop('enhance-routes')
 
+  timers.start('enhance-elements')
   for (const [ name, { component, mjs, html } ] of elements) {
     // prefer component over mjs over html
     if (component) {
@@ -107,8 +107,6 @@ export default async function load ({ basePath, debug = false, ...options }) {
       elementFunctions[name] = () => htmlString?.toString() || ''
     }
   }
-
-  timers.stop('enhance-elements-build')
   timers.stop('enhance-elements')
 
   return {
