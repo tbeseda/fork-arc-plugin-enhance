@@ -6,8 +6,8 @@
     ".": "./src/plugins/beginner.js",
     "./src/http/any-catchall/index.mjs": "./src/http/any-catchall/index.mjs",
     "./src/http/any-catchall/router.mjs": "./src/http/any-catchall/router.mjs",
-    "./app-core": "./app-core",
-    "./app-loader": "./app-loader"
+    "./app-core": "./app-core/src/index.js",
+    "./app-loader": "./app-loader/src/index.js"
   },
   "license": "Apache-2.0",
   "homepage": "https://enhance.dev",
@@ -64,15 +64,9 @@
     },
     "overrides": [
       {
-        "files": [
-          "*"
-        ],
+        "files": ["*"],
         "rules": {
-          "filenames/match-regex": [
-            "error",
-            "^[a-z0-9-_.$]+$",
-            true
-          ]
+          "filenames/match-regex": ["error", "^[a-z0-9-_.$]+$", true]
         }
       }
     ]
