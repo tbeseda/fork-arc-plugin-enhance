@@ -7,7 +7,9 @@
     "./src/http/any-catchall/index.mjs": "./src/http/any-catchall/index.mjs",
     "./src/http/any-catchall/router.mjs": "./src/http/any-catchall/router.mjs",
     "./app-core": "./app-core/src/index.js",
-    "./app-loader": "./app-loader/src/index.js"
+    "./app-loader": "./app-loader/src/index.js",
+    "./src/http/any-catchall/fingerprint-paths.mjs": "./src/http/any-catchall/fingerprint-paths.mjs",
+    "./src/http/any-catchall/util.mjs": "./src/http/any-catchall/util.mjs"
   },
   "license": "Apache-2.0",
   "homepage": "https://enhance.dev",
