@@ -74,10 +74,15 @@ export function createRouteAndRender ({
         log('resolving deffered api function')
         try {
           const apiModule = await deferredFn
+          const apiMethod = apiModule[method]
 
-          if (typeof apiModule[method] === 'function') {
+          if (typeof apiMethod === 'function') {
             log('executing api', `${method}()`)
             apiResult = await apiModule[method](...apiArgs)
+          } else if (Array.isArray(apiMethod)) {
+            log('executing api with', apiMethod.length, ' functions')
+            // TODO: test this
+            apiResult = await Promise.all(apiMethod.map(m => m(...apiArgs)))
           }
           else {
             log('api module missing method:', method)
@@ -101,8 +106,8 @@ export function createRouteAndRender ({
     // TODO: this isn't a complete implementation yet
     if (
       status > 299
-      || apiResult.body
-      || (reqHheaders?.accept === 'application/json' && apiResult.json)
+      || apiResult?.body
+      || (reqHheaders?.accept === 'application/json' && apiResult?.json)
     ) {
       log('returning api result without rendering')
       return apiResult
