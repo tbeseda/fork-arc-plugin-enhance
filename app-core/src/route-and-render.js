@@ -79,7 +79,8 @@ export function createRouteAndRender ({
           if (typeof apiMethod === 'function') {
             log('executing api', `${method}()`)
             apiResult = await apiModule[method](...apiArgs)
-          } else if (Array.isArray(apiMethod)) {
+          }
+          else if (Array.isArray(apiMethod)) {
             log('executing api with', apiMethod.length, ' functions')
             // TODO: test this
             apiResult = await Promise.all(apiMethod.map(m => m(...apiArgs)))
@@ -107,6 +108,9 @@ export function createRouteAndRender ({
     if (
       status > 299
       || apiResult?.body
+      || apiResult?.html
+      || apiResult?.xml
+      || apiResult?.text
       || (reqHheaders?.accept === 'application/json' && apiResult?.json)
     ) {
       log('returning api result without rendering')
@@ -148,7 +152,8 @@ export function createRouteAndRender ({
     else if (page.deferredHtml) {
       log('resolving deferred page html')
       pageHtml = (await page.deferredHtml).toString()
-    } else {
+    }
+    else {
       log('no page element or html')
       throw new Error('404', { cause: 'no page element or html' })
     }
@@ -161,9 +166,14 @@ export function createRouteAndRender ({
     )
 
     // merge timers into apiResult.headers
-    const headers = {
-      ...apiResult?.headers,
-      [timers.key]: [ timers.value(), apiResult?.headers?.[timers.key] ].join(', '),
+    let headers = apiResult?.headers
+    if (timers.timers().length > 0) {
+      const timerValues = [ timers.values() ]
+      if (headers?.[timers.key]) timerValues.push(headers[timers.key])
+      headers = {
+        ...headers,
+        [timers.key]: timerValues.join(','),
+      }
     }
 
     return {

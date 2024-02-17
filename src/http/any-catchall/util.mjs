@@ -29,13 +29,17 @@ export async function findPreflightFn (basePath) {
 }
 
 export function mergeTimingHeaders (headers, timers) {
+  if (timers.timers().length === 0) return headers
+
   const updatedHeaders = {
     ...headers,
     [timers.key]: [
-      timers.value(), // TODO: check if a timer exists
+      timers.value(),
       headers?.[timers.key],
-    ].join(', '),
+    ].join(','),
   }
+
   timers.reset()
+
   return updatedHeaders
 }
