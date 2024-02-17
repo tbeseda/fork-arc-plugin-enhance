@@ -6,8 +6,8 @@
     ".": "./src/plugins/beginner.js",
     "./src/http/any-catchall/index.mjs": "./src/http/any-catchall/index.mjs",
     "./src/http/any-catchall/router.mjs": "./src/http/any-catchall/router.mjs",
-    "app-core": "./app-core",
-    "app-loader": "./app-loader"
+    "./app-core": "./app-core",
+    "./app-loader": "./app-loader"
   },
   "license": "Apache-2.0",
   "homepage": "https://enhance.dev",
