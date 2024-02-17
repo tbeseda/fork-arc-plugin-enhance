@@ -37,11 +37,7 @@ const basePath = process.cwd()
 const appConfig = await loadAppConfig({ basePath })
 const app = createEnhanceApp(appConfig)
 
-async function http(req) {
-  return await app.routeAndRender(req)
-}
-
-export const handler = arc.http(http)
+export const handler = arc.http.bind(app.routeAndRender)
 ```
 
 this ☝️ is very minimal. check out [test/mocks](./test/mocks/) for a more complete Arc example and a vanilla Node.js `http` example.

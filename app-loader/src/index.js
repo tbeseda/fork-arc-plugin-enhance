@@ -72,10 +72,7 @@ export default async function load ({ basePath, debug = false, ...options }) {
         // Core's routeAndRender() does load it in elements for @enhance/ssr
         // elementFunctions[tagName] = await deferredFn
 
-        route.page.element = {
-          tagName,
-          deferredFn,
-        }
+        route.page.element = { tagName, deferredFn }
       }
       else if (page.html) {
         const pageHtml = page.html
