@@ -100,11 +100,12 @@ export function createRouteAndRender ({
     // should we return early or continute and create HTML?
     // TODO: this isn't a complete implementation yet
     if (
-      status > 299 ||
-      (reqHheaders?.accept === 'application/json' && apiResult.json)
+      status > 299
+      || apiResult.body
+      || (reqHheaders?.accept === 'application/json' && apiResult.json)
     ) {
       log('returning api result without rendering')
-      return { ...apiResult }
+      return apiResult
     }
 
     if (!page) {
